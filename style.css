@@ -1,0 +1,166 @@
+/* --- Basic Setup & Variables --- */
+:root {
+    --primary-blue: #005A9C;
+    --accent-green: #2E8540;
+    --dark-text: #333333;
+    --light-text: #666666;
+    --background-soft: #f8f9fa;
+    --white: #ffffff;
+    --border-light: #e9ecef;
+    --font-headline: 'Poppins', sans-serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--dark-text);
+    background-color: var(--white);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-headline);
+    color: var(--primary-blue);
+    margin-top: 0;
+}
+
+h1 { font-size: 2.5rem; line-height: 1.2; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.25rem; color: var(--dark-text); }
+
+p {
+    color: var(--light-text);
+}
+
+section {
+    padding: 60px 0;
+    text-align: center;
+}
+
+/* --- Buttons --- */
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.button-primary {
+    background-color: var(--accent-green);
+    color: var(--white);
+}
+
+.button-primary:hover {
+    background-color: #246832;
+}
+
+/* --- Navigation --- */
+.top-nav {
+    background-color: var(--white);
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.top-nav .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-family: var(--font-headline);
+    font-size: 1.5rem;
+    color: var(--primary-blue);
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--light-text);
+    margin-right: 15px;
+}
+
+.nav-button {
+    border: 1px solid var(--primary-blue);
+    color: var(--primary-blue);
+}
+.nav-button:hover {
+    background-color: var(--primary-blue);
+    color: var(--white);
+}
+
+
+/* --- Hero Section --- */
+.hero {
+    background-color: var(--background-soft);
+    padding: 80px 0;
+}
+
+.hero h1 {
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.hero p {
+    max-width: 600px;
+    margin: 20px auto 30px auto;
+    font-size: 1.1rem;
+}
+
+/* --- Other Sections --- */
+.proof .sample-card {
+    background: var(--background-soft);
+    border: 1px solid var(--border-light);
+    padding: 40px;
+    margin-top: 30px;
+    border-radius: 8px;
+}
+
+.steps, .benefits {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin-top: 40px;
+}
+
+.step, .benefit {
+    flex-basis: 30%;
+}
+
+/* --- Footer --- */
+.footer {
+    background-color: var(--dark-text);
+    color: var(--white);
+    padding: 30px 0;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer p { color: var(--white); }
+.footer a { color: var(--white); text-decoration: none; margin-left: 15px; }
+
+/* --- Mobile Responsive --- */
+@media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+
+    .steps, .benefits {
+        flex-direction: column;
+        align-items: center;
+    }
+    .footer .container {
+        flex-direction: column;
+    }
+}
