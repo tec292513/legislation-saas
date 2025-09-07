@@ -49,22 +49,68 @@
     <script>
         const mainContent = document.querySelector('.main-content');
         const logoutButton = document.querySelector('#logout-button');
+        let userProfile = null;
 
-        // This function runs as soon as the page loads
-        async function getLaws() {
-            // Asks Supabase for all laws in the 'laws' table
-            const { data, error } = await supaClient.from('laws').select('*');
+        // --- Log-Out Logic ---
+        logoutButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const { error } = await supaClient.auth.signOut();
+            if (!error) {
+                window.location.href = '/';
+            }
+        });
 
-            if (error) {
-                console.error('Error fetching laws:', error);
+        // This is the new, smarter function
+        async function getPersonalizedLaws() {
+            // 1. Get the current user's profile
+            const { data: { user } } = await supaClient.auth.getUser();
+            if (!user) return;
+
+            const { data: profileData, error: profileError } = await supaClient
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError) {
+                console.error('Error fetching profile:', profileError);
+                return;
+            }
+            userProfile = profileData;
+
+            // 2. Get all the laws
+            const { data: lawsData, error: lawsError } = await supaClient.from('laws').select('*');
+            if (lawsError) {
+                console.error('Error fetching laws:', lawsError);
                 return;
             }
 
-            // If we get the laws, clear the "loading" message
-            mainContent.innerHTML = '<h2>Your Briefing</h2>';
+            // 3. Compare profile to laws and find matches
+            const matchingLaws = lawsData.filter(law => {
+                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) {
+                    return true;
+                }
 
-            // Loop through each law and build a Law Card for it
-            for (const law of data) {
+                let isMatch = false;
+                if (law.applies_to_family_status && law.applies_to_family_status === userProfile.family_status) {
+                    isMatch = true;
+                }
+                if (law.applies_to_home_status && law.applies_to_home_status === userProfile.home_status) {
+                    isMatch = true;
+                }
+                if (law.applies_to_work_status && law.applies_to_work_status === userProfile.work_status) {
+                    isMatch = true;
+                }
+                return isMatch;
+            });
+            
+            // 4. Display the matching laws
+            mainContent.innerHTML = '<h2>Your Briefing</h2>';
+            if (matchingLaws.length === 0) {
+                mainContent.innerHTML += '<p>No new laws match your profile right now.</p>';
+            }
+
+            for (const law of matchingLaws) {
                 const lawCard = `
                     <div class="law-card">
                         <h3>${law.title}</h3>
@@ -79,17 +125,9 @@
             }
         }
 
-        // --- Log-Out Logic ---
-        logoutButton.addEventListener('click', async (event) => {
-            event.preventDefault();
-            const { error } = await supaClient.auth.signOut();
-            if (!error) {
-                window.location.href = '/';
-            }
-        });
-
-        // Run the function to get the laws
-        getLaws();
+        // Run the new function to get personalized laws
+        getPersonalizedLaws();
     </script>
+
 </body>
 </html>
