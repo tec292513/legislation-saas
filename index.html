@@ -15,7 +15,7 @@
         <div class="container">
             <div class="logo">YourLogo</div>
             <nav>
-                <a href="#" class="nav-link">Log In</a>
+                <a href="#" id="login-button" class="nav-link">Log In</a>
                 <a href="#" class="button nav-button">Sign Up</a>
             </nav>
         </div>
@@ -97,23 +97,71 @@
         </div>
     </footer>
 
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-button" class="close-button">&times;</span>
+            <h2>Log In</h2>
+            <form id="login-form">
+                <input type="email" id="login-email" placeholder="Enter your email" required>
+                <input type="password" id="login-password" placeholder="Enter your password" required>
+                <button type="submit" class="button button-primary">Log In</button>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const supabaseUrl = 'https://jodfjkhdwlzurkylnayl.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
-        // The variable below is renamed to fix the error
         const supaClient = supabase.createClient(supabaseUrl, supabaseKey);
 
         // --- Sign-Up Logic ---
         const signUpForm = document.querySelector('#signup-form');
         signUpForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-
             const email = document.querySelector('#email').value;
             const password = document.querySelector('#password').value;
-
-            // Use the new variable name here to sign the user up
             const { data, error } = await supaClient.auth.signUp({
+                email: email,
+                password: password,
+            });
+            if (error) {
+                alert('Error: ' + error.message);
+            } else {
+                alert('Success! Please check your email for a confirmation link.');
+                signUpForm.reset();
+            }
+        });
+
+        // --- Login Modal Logic ---
+        const loginModal = document.querySelector('#login-modal');
+        const loginButton = document.querySelector('#login-button');
+        const closeButton = document.querySelector('#close-button');
+
+        loginButton.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevents link from jumping to top of page
+            loginModal.style.display = 'block';
+        });
+
+        closeButton.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == loginModal) {
+                loginModal.style.display = 'none';
+            }
+        });
+
+        // --- Log-In Logic ---
+        const loginForm = document.querySelector('#login-form');
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const email = document.querySelector('#login-email').value;
+            const password = document.querySelector('#login-password').value;
+
+            const { data, error } = await supaClient.auth.signInWithPassword({
                 email: email,
                 password: password,
             });
@@ -121,8 +169,8 @@
             if (error) {
                 alert('Error: ' + error.message);
             } else {
-                alert('Success! Please check your email for a confirmation link.');
-                signUpForm.reset();
+                // If login is successful, send user to the dashboard
+                window.location.href = '/dashboard.html';
             }
         });
     </script>
