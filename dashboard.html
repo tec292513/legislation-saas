@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const { createClient } = supabase;
+        const supabaseUrl = 'https://jodfjkhdwlzurkylnayl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
+        const supaClient = createClient(supabaseUrl, supabaseKey);
+
+        async function checkUser() {
+            const { data, error } = await supaClient.auth.getUser();
+            if (error || !data.user) {
+                // If no user is logged in, send them back to the homepage
+                window.location.href = '/';
+            }
+        }
+        checkUser();
+    </script>
+
+    <header class="top-nav">
+        <div class="container">
+            <div class="logo">YourLogo</div>
+            <nav>
+                <a href="#" id="logout-button" class="nav-link">Log Out</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="sidebar">
+            <h2>Filters</h2>
+            </div>
+        <div class="main-content">
+            <h2>Your Briefing</h2>
+            <p>New laws that affect you will appear here.</p>
+            </div>
+    </main>
+    
+    <script>
+        // --- Log-Out Logic ---
+        const logoutButton = document.querySelector('#logout-button');
+        logoutButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            const { error } = await supaClient.auth.signOut();
+            if (!error) {
+                window.location.href = '/';
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -198,3 +198,23 @@ section {
 .close-button:hover {
     color: #000;
 }
+/* --- Dashboard Page Styles --- */
+.dashboard-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+    gap: 30px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--background-soft);
+    padding: 20px;
+    border-radius: 8px;
+    height: fit-content;
+}
+
+.main-content {
+    flex-grow: 1;
+}
