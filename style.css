@@ -218,3 +218,37 @@ section {
 .main-content {
     flex-grow: 1;
 }
+/* --- Law Card Styles --- */
+.law-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.law-card h3 {
+    margin-top: 0;
+}
+
+.badges {
+    margin-bottom: 15px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 12px;
+    color: var(--white);
+}
+
+.badge.jurisdiction {
+    background-color: var(--primary-blue);
+}
+
+.badge.status {
+    background-color: var(--accent-green);
+}

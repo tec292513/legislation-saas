@@ -47,8 +47,39 @@
     </main>
     
     <script>
-        // --- Log-Out Logic ---
+        const mainContent = document.querySelector('.main-content');
         const logoutButton = document.querySelector('#logout-button');
+
+        // This function runs as soon as the page loads
+        async function getLaws() {
+            // Asks Supabase for all laws in the 'laws' table
+            const { data, error } = await supaClient.from('laws').select('*');
+
+            if (error) {
+                console.error('Error fetching laws:', error);
+                return;
+            }
+
+            // If we get the laws, clear the "loading" message
+            mainContent.innerHTML = '<h2>Your Briefing</h2>';
+
+            // Loop through each law and build a Law Card for it
+            for (const law of data) {
+                const lawCard = `
+                    <div class="law-card">
+                        <h3>${law.title}</h3>
+                        <div class="badges">
+                            <span class="badge jurisdiction">${law.jurisdiction}</span>
+                            <span class="badge status">${law.status}</span>
+                        </div>
+                        <p>${law.summary}</p>
+                    </div>
+                `;
+                mainContent.innerHTML += lawCard;
+            }
+        }
+
+        // --- Log-Out Logic ---
         logoutButton.addEventListener('click', async (event) => {
             event.preventDefault();
             const { error } = await supaClient.auth.signOut();
@@ -56,7 +87,9 @@
                 window.location.href = '/';
             }
         });
-    </script>
 
+        // Run the function to get the laws
+        getLaws();
+    </script>
 </body>
 </html>
