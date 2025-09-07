@@ -252,3 +252,67 @@ section {
 .badge.status {
     background-color: var(--accent-green);
 }
+/* --- Onboarding Page Styles --- */
+.onboarding-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 40px;
+    background-color: var(--white);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.onboarding-container h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.onboarding-container p {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    box-sizing: border-box; /* Important for padding */
+}
+
+.choices {
+    display: flex;
+    gap: 10px;
+}
+
+.choice-button {
+    flex-grow: 1;
+    padding: 12px 10px;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    background-color: var(--background-soft);
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.choice-button:hover {
+    background-color: #e2e6ea;
+}
+
+.choice-button.selected {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border-color: var(--primary-blue);
+}

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Your Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const { createClient } = supabase;
+        const supabaseUrl = 'https://jodfjkhdwlzurkylnayl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
+        const supaClient = createClient(supabaseUrl, supabaseKey);
+
+        let currentUserId = null;
+
+        async function checkUser() {
+            const { data, error } = await supaClient.auth.getUser();
+            if (error || !data.user) {
+                window.location.href = '/'; // Go to homepage if not logged in
+            } else {
+                currentUserId = data.user.id; // Save the user's ID
+            }
+        }
+        checkUser();
+    </script>
+
+    <header class="top-nav">
+        <div class="container">
+            <div class="logo">YourLogo</div>
+        </div>
+    </header>
+
+    <main class="onboarding-container">
+        <form id="onboarding-form">
+            <div id="step1">
+                <h2>Welcome! Let's complete your profile.</h2>
+                <p>This helps us find the right laws for you.</p>
+                <div class="form-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="zip_code">ZIP Code</label>
+                    <input type="text" id="zip_code" required>
+                </div>
+                <button type="button" id="next-button" class="button button-primary">Next</button>
+            </div>
+
+            <div id="step2" style="display: none;">
+                <h2>Tell us about yourself.</h2>
+                <div class="form-group">
+                    <label>Family Status</label>
+                    <div class="choices">
+                        <button type="button" class="choice-button" data-field="family_status" data-value="Single">Single</button>
+                        <button type="button" class="choice-button" data-field="family_status" data-value="Married">Married</button>
+                        <button type="button" class="choice-button" data-field="family_status" data-value="Have Children">Have Children</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Home Status</label>
+                    <div class="choices">
+                        <button type="button" class="choice-button" data-field="home_status" data-value="Rent">Rent</button>
+                        <button type="button" class="choice-button" data-field="home_status" data-value="Own a Home">Own a Home</button>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label>Work Status</label>
+                    <div class="choices">
+                        <button type="button" class="choice-button" data-field="work_status" data-value="Employee">Employee</button>
+                        <button type="button" class="choice-button" data-field="work_status" data-value="Business Owner">Business Owner</button>
+                    </div>
+                </div>
+                <button type="submit" class="button button-primary">Finish Setup</button>
+            </div>
+        </form>
+    </main>
+    
+    <script>
+        // Store the user's answers
+        const userProfile = {};
+
+        const step1 = document.querySelector('#step1');
+        const step2 = document.querySelector('#step2');
+        const nextButton = document.querySelector('#next-button');
+        const choiceButtons = document.querySelectorAll('.choice-button');
+        const onboardingForm = document.querySelector('#onboarding-form');
+
+        // Go to Step 2
+        nextButton.addEventListener('click', () => {
+            userProfile.first_name = document.querySelector('#first_name').value;
+            userProfile.zip_code = document.querySelector('#zip_code').value;
+            step1.style.display = 'none';
+            step2.style.display = 'block';
+        });
+
+        // Handle button choices
+        choiceButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const field = button.dataset.field;
+                const value = button.dataset.value;
+                userProfile[field] = value;
+                // Optional: Add a 'selected' class for styling
+                document.querySelectorAll(`[data-field=${field}]`).forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+            });
+        });
+
+        // Handle final form submission
+        onboardingForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            // Add the user's ID to the profile
+            userProfile.id = currentUserId;
+
+            const { data, error } = await supaClient.from('profiles').insert([userProfile]);
+
+            if (error) {
+                alert('Error saving profile: ' + error.message);
+            } else {
+                // Send user to the dashboard after success
+                window.location.href = '/dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>

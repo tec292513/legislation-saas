@@ -128,8 +128,8 @@
             if (error) {
                 alert('Error: ' + error.message);
             } else {
-                alert('Success! Please check your email for a confirmation link.');
-                signUpForm.reset();
+                // Send the new user to the onboarding page to complete their profile
+                window.location.href = '/onboarding.html';
             }
         });
 
