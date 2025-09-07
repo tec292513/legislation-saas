@@ -23,17 +23,17 @@
 
     <main>
         <section class="hero">
-    <div class="container">
-        <h1>See only the laws that affect you — in plain English.</h1>
-        <p>Stop worrying about missed opportunities and confusing legal jargon. We bring you clarity and peace of mind for your family and business.</p>
-        
-        <form id="signup-form" class="signup-form">
-            <input type="email" id="email" placeholder="Enter your email" required>
-            <input type="password" id="password" placeholder="Create a password" required>
-            <button type="submit" class="button button-primary">Get Started for Free</button>
-        </form>
-        </div>
-</section>
+            <div class="container">
+                <h1>See only the laws that affect you — in plain English.</h1>
+                <p>Stop worrying about missed opportunities and confusing legal jargon. We bring you clarity and peace of mind for your family and business.</p>
+                
+                <form id="signup-form" class="signup-form">
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                    <input type="password" id="password" placeholder="Create a password" required>
+                    <button type="submit" class="button button-primary">Get Started for Free</button>
+                </form>
+            </div>
+        </section>
 
         <section class="proof">
             <div class="container">
@@ -96,24 +96,24 @@
             </nav>
         </div>
     </footer>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Connects to your Supabase project
         const supabaseUrl = 'https://jodfjkhdwlzurkylnayl.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-    </script>
-<script>
+        // The variable below is renamed to fix the error
+        const supaClient = supabase.createClient(supabaseUrl, supabaseKey);
+
         // --- Sign-Up Logic ---
         const signUpForm = document.querySelector('#signup-form');
-
         signUpForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevents the page from reloading
+            event.preventDefault();
 
             const email = document.querySelector('#email').value;
             const password = document.querySelector('#password').value;
 
-            const { data, error } = await supabase.auth.signUp({
+            // Use the new variable name here to sign the user up
+            const { data, error } = await supaClient.auth.signUp({
                 email: email,
                 password: password,
             });
@@ -122,9 +122,10 @@
                 alert('Error: ' + error.message);
             } else {
                 alert('Success! Please check your email for a confirmation link.');
-                signUpForm.reset(); // Clears the form
+                signUpForm.reset();
             }
         });
     </script>
+
 </body>
 </html>
