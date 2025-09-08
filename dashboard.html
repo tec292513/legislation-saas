@@ -14,7 +14,7 @@
     <script>
         const { createClient } = supabase;
         const supabaseUrl = 'https://jodfjkhdwlzurkylnayl.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
+        const supabaseKey = 'eyJhbGciOiJIJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
         const supaClient = createClient(supabaseUrl, supabaseKey);
 
         async function checkUser() {
@@ -93,29 +93,29 @@
 
         // --- Function to Display Laws Based on Filters ---
         function displayFilteredLaws() {
-            // --- THIS IS THE CORRECTED MATCHING LOGIC ---
+            // --- THIS IS THE DEBUGGING VERSION ---
+            console.log("--- STARTING DEBUG ---");
+            console.log("User Profile Data:", userProfile);
+            console.log("All Laws from DB:", allLaws);
+            console.log("Current Filters:", currentFilters);
+
             const matchingLaws = allLaws.filter(law => {
                 let isMatch = true;
-                if (law.applies_to_family_status && law.applies_to_family_status !== userProfile.family_status) {
-                    isMatch = false;
-                }
-                if (law.applies_to_home_status && law.applies_to_home_status !== userProfile.home_status) {
-                    isMatch = false;
-                }
-                if (law.applies_to_work_status && law.applies_to_work_status !== userProfile.work_status) {
-                    isMatch = false;
-                }
-                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) {
-                    isMatch = false;
-                }
+                if (law.applies_to_family_status && law.applies_to_family_status !== userProfile.family_status) { isMatch = false; }
+                if (law.applies_to_home_status && law.applies_to_home_status !== userProfile.home_status) { isMatch = false; }
+                if (law.applies_to_work_status && law.applies_to_work_status !== userProfile.work_status) { isMatch = false; }
+                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) { isMatch = false; }
                 return isMatch;
             });
+            console.log("Laws that match profile:", matchingLaws);
 
             const filteredLaws = matchingLaws.filter(law => {
                 const jurisdictionMatch = currentFilters.jurisdiction === 'all' || law.jurisdiction === currentFilters.jurisdiction;
                 const categoryMatch = currentFilters.category === 'all' || law.category === currentFilters.category;
                 return jurisdictionMatch && categoryMatch;
             });
+            console.log("Final laws after filtering:", filteredLaws);
+            console.log("--- END DEBUG ---");
 
             mainContent.innerHTML = '<h2>Your Briefing</h2>';
             if (filteredLaws.length === 0) {
@@ -136,7 +136,6 @@
         }
 
         // --- Logic to Handle Filter Button Clicks ---
-        const filterButtons = document.querySelectorAll('.filter-button');
         filterButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const filterGroup = button.dataset.filter;
