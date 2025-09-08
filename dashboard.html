@@ -39,11 +39,21 @@
     <main class="dashboard-container">
         <div class="sidebar">
             <h2>Filters</h2>
+            <div class="filter-group">
+                <h3>Jurisdiction</h3>
+                <button class="filter-button active" data-filter="jurisdiction" data-value="all">All</button>
+                <button class="filter-button" data-filter="jurisdiction" data-value="Federal">Federal</button>
+                <button class="filter-button" data-filter="jurisdiction" data-value="California">California</button>
             </div>
+            <div class="filter-group">
+                <h3>Category</h3>
+                <button class="filter-button active" data-filter="category" data-value="all">All</button>
+                </div>
+        </div>
         <div class="main-content">
             <h2>Your Briefing</h2>
             <p>New laws that affect you will appear here.</p>
-            </div>
+        </div>
     </main>
     
     <script>
@@ -62,7 +72,6 @@
 
         // This is the new, smarter function
         async function getPersonalizedLaws() {
-            // 1. Get the current user's profile
             const { data: { user } } = await supaClient.auth.getUser();
             if (!user) return;
 
@@ -78,33 +87,23 @@
             }
             userProfile = profileData;
 
-            // 2. Get all the laws
             const { data: lawsData, error: lawsError } = await supaClient.from('laws').select('*');
             if (lawsError) {
                 console.error('Error fetching laws:', lawsError);
                 return;
             }
 
-            // 3. Compare profile to laws and find matches
             const matchingLaws = lawsData.filter(law => {
                 if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) {
                     return true;
                 }
-
                 let isMatch = false;
-                if (law.applies_to_family_status && law.applies_to_family_status === userProfile.family_status) {
-                    isMatch = true;
-                }
-                if (law.applies_to_home_status && law.applies_to_home_status === userProfile.home_status) {
-                    isMatch = true;
-                }
-                if (law.applies_to_work_status && law.applies_to_work_status === userProfile.work_status) {
-                    isMatch = true;
-                }
+                if (law.applies_to_family_status && law.applies_to_family_status === userProfile.family_status) { isMatch = true; }
+                if (law.applies_to_home_status && law.applies_to_home_status === userProfile.home_status) { isMatch = true; }
+                if (law.applies_to_work_status && law.applies_to_work_status === userProfile.work_status) { isMatch = true; }
                 return isMatch;
             });
             
-            // 4. Display the matching laws
             mainContent.innerHTML = '<h2>Your Briefing</h2>';
             if (matchingLaws.length === 0) {
                 mainContent.innerHTML += '<p>No new laws match your profile right now.</p>';
@@ -124,8 +123,7 @@
                 mainContent.innerHTML += lawCard;
             }
         }
-
-        // Run the new function to get personalized laws
+        
         getPersonalizedLaws();
     </script>
 
