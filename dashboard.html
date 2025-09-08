@@ -20,7 +20,6 @@
         async function checkUser() {
             const { data, error } = await supaClient.auth.getUser();
             if (error || !data.user) {
-                // If no user is logged in, send them back to the homepage
                 window.location.href = '/';
             }
         }
@@ -48,68 +47,78 @@
             <div class="filter-group">
                 <h3>Category</h3>
                 <button class="filter-button active" data-filter="category" data-value="all">All</button>
-                </div>
+                <button class="filter-button" data-filter="category" data-value="Taxes">Taxes</button>
+                <button class="filter-button" data-filter="category" data-value="Family">Family</button>
+            </div>
         </div>
         <div class="main-content">
             <h2>Your Briefing</h2>
-            <p>New laws that affect you will appear here.</p>
+            <p>Loading laws...</p>
         </div>
     </main>
     
     <script>
         const mainContent = document.querySelector('.main-content');
         const logoutButton = document.querySelector('#logout-button');
+        
         let userProfile = null;
+        let allLaws = [];
+        let currentFilters = {
+            jurisdiction: 'all',
+            category: 'all'
+        };
 
         // --- Log-Out Logic ---
         logoutButton.addEventListener('click', async (event) => {
             event.preventDefault();
             const { error } = await supaClient.auth.signOut();
-            if (!error) {
-                window.location.href = '/';
-            }
+            if (!error) { window.location.href = '/'; }
         });
 
-        // This is the new, smarter function
-        async function getPersonalizedLaws() {
+        // --- Main Function to Fetch and Display Laws ---
+        async function initializeDashboard() {
             const { data: { user } } = await supaClient.auth.getUser();
             if (!user) return;
 
-            const { data: profileData, error: profileError } = await supaClient
-                .from('profiles')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-
-            if (profileError) {
-                console.error('Error fetching profile:', profileError);
-                return;
-            }
+            // 1. Fetch user profile
+            const { data: profileData, error: profileError } = await supaClient.from('profiles').select('*').eq('id', user.id).single();
+            if (profileError) { return console.error('Error fetching profile:', profileError); }
             userProfile = profileData;
 
+            // 2. Fetch all laws ONCE
             const { data: lawsData, error: lawsError } = await supaClient.from('laws').select('*');
-            if (lawsError) {
-                console.error('Error fetching laws:', lawsError);
-                return;
-            }
+            if (lawsError) { return console.error('Error fetching laws:', lawsError); }
+            allLaws = lawsData;
 
-            const matchingLaws = lawsData.filter(law => {
-                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) {
-                    return true;
-                }
+            // 3. Initial display
+            displayFilteredLaws();
+        }
+
+        // --- Function to Display Laws Based on Filters ---
+        function displayFilteredLaws() {
+            // 3a. Filter by user profile (Matching Engine)
+            const matchingLaws = allLaws.filter(law => {
+                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) return true;
                 let isMatch = false;
-                if (law.applies_to_family_status && law.applies_to_family_status === userProfile.family_status) { isMatch = true; }
-                if (law.applies_to_home_status && law.applies_to_home_status === userProfile.home_status) { isMatch = true; }
-                if (law.applies_to_work_status && law.applies_to_work_status === userProfile.work_status) { isMatch = true; }
+                if (law.applies_to_family_status === userProfile.family_status) isMatch = true;
+                if (law.applies_to_home_status === userProfile.home_status) isMatch = true;
+                if (law.applies_to_work_status === userProfile.work_status) isMatch = true;
                 return isMatch;
             });
-            
-            mainContent.innerHTML = '<h2>Your Briefing</h2>';
-            if (matchingLaws.length === 0) {
-                mainContent.innerHTML += '<p>No new laws match your profile right now.</p>';
-            }
 
-            for (const law of matchingLaws) {
+            // 3b. Filter by selected buttons
+            const filteredLaws = matchingLaws.filter(law => {
+                const jurisdictionMatch = currentFilters.jurisdiction === 'all' || law.jurisdiction === currentFilters.jurisdiction;
+                const categoryMatch = currentFilters.category === 'all' || law.category === currentFilters.category;
+                return jurisdictionMatch && categoryMatch;
+            });
+
+            // 4. Display the final list of laws
+            mainContent.innerHTML = '<h2>Your Briefing</h2>';
+            if (filteredLaws.length === 0) {
+                mainContent.innerHTML += '<p>No new laws match your profile and selected filters.</p>';
+            }
+            for (const law of filteredLaws) {
                 const lawCard = `
                     <div class="law-card">
                         <h3>${law.title}</h3>
@@ -118,13 +127,32 @@
                             <span class="badge status">${law.status}</span>
                         </div>
                         <p>${law.summary}</p>
-                    </div>
-                `;
+                    </div>`;
                 mainContent.innerHTML += lawCard;
             }
         }
-        
-        getPersonalizedLaws();
+
+        // --- Logic to Handle Filter Button Clicks ---
+        const filterButtons = document.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filterGroup = button.dataset.filter;
+                const filterValue = button.dataset.value;
+                
+                // Update the active filter state
+                currentFilters[filterGroup] = filterValue;
+
+                // Update the active button visually
+                document.querySelectorAll(`[data-filter="${filterGroup}"]`).forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // Re-display the laws with the new filter
+                displayFilteredLaws();
+            });
+        });
+
+        // Run the main function when the page loads
+        initializeDashboard();
     </script>
 
 </body>
