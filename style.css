@@ -359,3 +359,27 @@ section {
     border-color: var(--primary-blue);
     font-weight: 500;
 }
+/* --- Premium Content Styles --- */
+.premium-content {
+    background-color: var(--background-soft);
+    border-top: 2px solid var(--accent-green);
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 0 0 8px 8px;
+}
+
+.premium-content h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: var(--primary-blue);
+}
+
+.premium-content p {
+    font-size: 0.9rem;
+    white-space: pre-wrap; /* This helps format the action steps */
+}
+
+.upgrade-prompt {
+    margin-top: 20px;
+    text-align: center;
+}
