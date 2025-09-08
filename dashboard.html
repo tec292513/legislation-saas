@@ -81,6 +81,7 @@
         function displayFilteredLaws() {
             const matchingLaws = allLaws.filter(law => {
                 let isMatch = true;
+                // --- THIS SECTION IS NOW CORRECTED ---
                 if (law.applies_to_family_status && law.applies_to_family_status !== userProfile.family_status) { isMatch = false; }
                 if (law.applies_to_home_status && law.applies_to_home_status !== userProfile.home_status) { isMatch = false; }
                 if (law.applies_to_work_status && law.applies_to_work_status !== userProfile.work_status) { isMatch = false; }
