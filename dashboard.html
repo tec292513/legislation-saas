@@ -23,10 +23,22 @@
     <main class="dashboard-container">
         <div class="sidebar">
             <h2>Filters</h2>
+            <div class="filter-group">
+                <h3>Jurisdiction</h3>
+                <button class="filter-button active" data-filter="jurisdiction" data-value="all">All</button>
+                <button class="filter-button" data-filter="jurisdiction" data-value="Federal">Federal</button>
+                <button class="filter-button" data-filter="jurisdiction" data-value="California">California</button>
+            </div>
+            <div class="filter-group">
+                <h3>Category</h3>
+                <button class="filter-button active" data-filter="category" data-value="all">All</button>
+                <button class="filter-button" data-filter="category" data-value="Taxes">Taxes</button>
+                <button class="filter-button" data-filter="category" data-value="Family">Family</button>
+            </div>
         </div>
         <div class="main-content">
             <h2>Your Briefing</h2>
-            <p>Running final check...</p>
+            <p>Loading laws...</p>
         </div>
     </main>
     
@@ -36,28 +48,100 @@
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
         const supaClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+        const mainContent = document.querySelector('.main-content');
+        const logoutButton = document.querySelector('#logout-button');
+        
+        let userProfile = null;
+        let allLaws = [];
+        let currentFilters = { jurisdiction: 'all', category: 'all' };
+
         supaClient.auth.onAuthStateChange((event, session) => {
             if (session) {
-                runFinalCheck(session.user);
+                initializeDashboard(session.user);
             } else {
                 window.location.href = '/';
             }
         });
-        
-        // This is a special debug function. It only fetches and logs data.
-        async function runFinalCheck(user) {
-            console.log("--- FINAL CHECK ---");
 
-            // 1. Fetch user profile
-            const { data: profileData, error: profileError } = await supaClient.from('profiles').select('*').eq('id', user.id).single();
-            console.log("This is the user's profile from the database:");
-            console.log(profileData);
+        logoutButton.addEventListener('click', async (event) => {
+            event.preventDefault();
+            await supaClient.auth.signOut();
+        });
 
-            // 2. Fetch the law
-            const { data: lawsData, error: lawsError } = await supaClient.from('laws').select('*');
-            console.log("This is the law from the database:");
-            console.log(lawsData[0]); // We only have one law
+        async function initializeDashboard(user) {
+            const { data: profileData } = await supaClient.from('profiles').select('*').eq('id', user.id).single();
+            userProfile = profileData;
+
+            const { data: lawsData } = await supaClient.from('laws').select('*');
+            allLaws = lawsData;
+
+            displayFilteredLaws();
         }
+
+        function displayFilteredLaws() {
+            const matchingLaws = allLaws.filter(law => {
+                let isMatch = true;
+                if (law.applies_to_family_status && law.applies_to_family_status !== userProfile.family_status) { isMatch = false; }
+                if (law.applies_to_home_status && law.applies_to_home_status !== userProfile.home_status) { isMatch = false; }
+                if (law.applies_to_work_status && law.applies_to_work_status !== userProfile.work_status) { isMatch = false; }
+                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) { isMatch = false; }
+                return isMatch;
+            });
+
+            const filteredLaws = matchingLaws.filter(law => {
+                const jurisdictionMatch = currentFilters.jurisdiction === 'all' || law.jurisdiction === currentFilters.jurisdiction;
+                const categoryMatch = currentFilters.category === 'all' || law.category === currentFilters.category;
+                return jurisdictionMatch && categoryMatch;
+            });
+
+            mainContent.innerHTML = '<h2>Your Briefing</h2>';
+            if (filteredLaws.length === 0) {
+                mainContent.innerHTML += '<p>No new laws match your profile and selected filters.</p>';
+            }
+            for (const law of filteredLaws) {
+                let premiumContent = '';
+                if (userProfile.is_premium) {
+                    premiumContent = `
+                        <div class="premium-content">
+                            <h4>Financial Impact</h4>
+                            <p>${law.financial_impact}</p>
+                            <h4>Action Steps</h4>
+                            <p>${law.action_steps}</p>
+                        </div>
+                    `;
+                } else {
+                    premiumContent = `
+                        <div class="upgrade-prompt">
+                            <a href="#" class="button button-primary">Upgrade to see Action Steps</a>
+                        </div>
+                    `;
+                }
+
+                const lawCard = `
+                    <div class="law-card">
+                        <h3>${law.title}</h3>
+                        <div class="badges">
+                            <span class="badge jurisdiction">${law.jurisdiction}</span>
+                            <span class="badge status">${law.status}</span>
+                        </div>
+                        <p>${law.summary}</p>
+                        ${premiumContent}
+                    </div>`;
+                mainContent.innerHTML += lawCard;
+            }
+        }
+
+        const filterButtons = document.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const filterGroup = button.dataset.filter;
+                const filterValue = button.dataset.value;
+                currentFilters[filterGroup] = filterValue;
+                document.querySelectorAll(`[data-filter="${filterGroup}"]`).forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                displayFilteredLaws();
+            });
+        });
     </script>
 
 </body>
