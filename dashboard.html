@@ -80,40 +80,43 @@
             const { data: { user } } = await supaClient.auth.getUser();
             if (!user) return;
 
-            // 1. Fetch user profile
             const { data: profileData, error: profileError } = await supaClient.from('profiles').select('*').eq('id', user.id).single();
             if (profileError) { return console.error('Error fetching profile:', profileError); }
             userProfile = profileData;
 
-            // 2. Fetch all laws ONCE
             const { data: lawsData, error: lawsError } = await supaClient.from('laws').select('*');
             if (lawsError) { return console.error('Error fetching laws:', lawsError); }
             allLaws = lawsData;
 
-            // 3. Initial display
             displayFilteredLaws();
         }
 
         // --- Function to Display Laws Based on Filters ---
         function displayFilteredLaws() {
-            // 3a. Filter by user profile (Matching Engine)
+            // --- THIS IS THE CORRECTED MATCHING LOGIC ---
             const matchingLaws = allLaws.filter(law => {
-                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) return true;
-                let isMatch = false;
-                if (law.applies_to_family_status === userProfile.family_status) isMatch = true;
-                if (law.applies_to_home_status === userProfile.home_status) isMatch = true;
-                if (law.applies_to_work_status === userProfile.work_status) isMatch = true;
+                let isMatch = true;
+                if (law.applies_to_family_status && law.applies_to_family_status !== userProfile.family_status) {
+                    isMatch = false;
+                }
+                if (law.applies_to_home_status && law.applies_to_home_status !== userProfile.home_status) {
+                    isMatch = false;
+                }
+                if (law.applies_to_work_status && law.applies_to_work_status !== userProfile.work_status) {
+                    isMatch = false;
+                }
+                if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) {
+                    isMatch = false;
+                }
                 return isMatch;
             });
 
-            // 3b. Filter by selected buttons
             const filteredLaws = matchingLaws.filter(law => {
                 const jurisdictionMatch = currentFilters.jurisdiction === 'all' || law.jurisdiction === currentFilters.jurisdiction;
                 const categoryMatch = currentFilters.category === 'all' || law.category === currentFilters.category;
                 return jurisdictionMatch && categoryMatch;
             });
 
-            // 4. Display the final list of laws
             mainContent.innerHTML = '<h2>Your Briefing</h2>';
             if (filteredLaws.length === 0) {
                 mainContent.innerHTML += '<p>No new laws match your profile and selected filters.</p>';
@@ -138,20 +141,13 @@
             button.addEventListener('click', () => {
                 const filterGroup = button.dataset.filter;
                 const filterValue = button.dataset.value;
-                
-                // Update the active filter state
                 currentFilters[filterGroup] = filterValue;
-
-                // Update the active button visually
                 document.querySelectorAll(`[data-filter="${filterGroup}"]`).forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
-
-                // Re-display the laws with the new filter
                 displayFilteredLaws();
             });
         });
 
-        // Run the main function when the page loads
         initializeDashboard();
     </script>
 
