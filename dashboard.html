@@ -10,20 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabaseUrl = 'https://jodfjkhdwlzurkylnayl.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
-        const supaClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-        supaClient.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                initializeDashboard(session.user);
-            } else {
-                window.location.href = '/';
-            }
-        });
-    </script>
 
     <header class="top-nav">
         <div class="container">
@@ -56,13 +42,26 @@
         </div>
     </main>
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        const supabaseUrl = 'https://jodfjkhdwlzurkylnayl.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpvZGZqa2hkd2x6dXJreWxuYXlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcyMTAwMDYsImV4cCI6MjA3Mjc4NjAwNn0.51MRmokELdbOYDq6ffZcIAWgqYo_crZwDctPK6M4UDU';
+        const supaClient = supabase.createClient(supabaseUrl, supabaseKey);
+
         const mainContent = document.querySelector('.main-content');
         const logoutButton = document.querySelector('#logout-button');
         
         let userProfile = null;
         let allLaws = [];
         let currentFilters = { jurisdiction: 'all', category: 'all' };
+
+        supaClient.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                initializeDashboard(session.user);
+            } else {
+                window.location.href = '/';
+            }
+        });
 
         logoutButton.addEventListener('click', async (event) => {
             event.preventDefault();
@@ -80,13 +79,6 @@
         }
 
         function displayFilteredLaws() {
-            // --- DEBUGGING CONSOLE LOGS ---
-            console.log("--- DEBUGGING DATA ---");
-            console.log("PROFILE:", userProfile);
-            console.log("LAW:", allLaws[0]); // We only have one law, so let's inspect it
-            console.log("FILTERS:", currentFilters);
-            console.log("----------------------");
-            
             const matchingLaws = allLaws.filter(law => {
                 let isMatch = true;
                 if (law.applies_to_family_status && law.applies_to_family_status !== userProfile.family_status) { isMatch = false; }
@@ -94,7 +86,7 @@
                 if (law.applies_to_work_status && law.applies_to_work_status !== userProfile.work_status) { isMatch = false; }
                 if (!law.applies_to_family_status && !law.applies_to_home_status && !law.applies_to_work_status) { isMatch = false; }
                 return isMatch;
-});
+            });
 
             const filteredLaws = matchingLaws.filter(law => {
                 const jurisdictionMatch = currentFilters.jurisdiction === 'all' || law.jurisdiction === currentFilters.jurisdiction;
@@ -103,11 +95,20 @@
             });
 
             mainContent.innerHTML = '<h2>Your Briefing</h2>';
+            // THIS IS THE CORRECTED LINE
             if (filteredLaws.length === 0) {
                 mainContent.innerHTML += '<p>No new laws match your profile and selected filters.</p>';
             }
             for (const law of filteredLaws) {
-                const lawCard = `...`; // HTML for card
+                const lawCard = `
+                    <div class="law-card">
+                        <h3>${law.title}</h3>
+                        <div class="badges">
+                            <span class="badge jurisdiction">${law.jurisdiction}</span>
+                            <span class="badge status">${law.status}</span>
+                        </div>
+                        <p>${law.summary}</p>
+                    </div>`;
                 mainContent.innerHTML += lawCard;
             }
         }
@@ -124,5 +125,6 @@
             });
         });
     </script>
+
 </body>
 </html>
