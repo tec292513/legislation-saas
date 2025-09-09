@@ -110,10 +110,13 @@
                         </div>
                     `;
                 } else {
-                    // --- THIS LINK IS NOW FIXED ---
+                    // --- THIS IS THE UPDATED SECTION ---
+                    const stripeLink = 'https://buy.stripe.com/test_fZubJ160sf8w2fg1tV1VK00';
+                    const stripeLinkWithUser = `${stripeLink}?client_reference_id=${userProfile.id}`;
+                    
                     premiumContent = `
                         <div class="upgrade-prompt">
-                            <a href="https://buy.stripe.com/test_fZubJ160sf8w2fg1tV1VK00" class="button button-primary">Upgrade to see Action Steps</a>
+                            <a href="${stripeLinkWithUser}" class="button button-primary">Upgrade to see Action Steps</a>
                         </div>
                     `;
                 }
